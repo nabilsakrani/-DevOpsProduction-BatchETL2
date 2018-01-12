@@ -1,9 +1,9 @@
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
+import it.reply.data.pasquali.Storage
 import org.apache.kudu.spark.kudu._
 import org.apache.log4j.Logger
-import org.apache.spark._
 import org.apache.spark.sql.SparkSession
 
 
@@ -29,6 +29,7 @@ object BatchETL {
 
   var CONF_DIR = ""
   var CONFIG_FILE = "BatchETL.conf"
+  var storage = Storage()
 
   def main(args: Array[String]): Unit = {
 
@@ -48,8 +49,14 @@ object BatchETL {
     SPARK_APPNAME = configuration.getString("betl.spark.app_name")
     SPARK_MASTER = configuration.getString("betl.spark.master")
 
-    val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
+    var split = KUDU_MASTER.split(":")
+    var KUDU_ADDR = split(0)
+    var KUDU_PORT = split(0)
 
+    storage = Storage()
+      .init(SPARK_MASTER, SPARK_MASTER, true)
+
+    val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
     var kuduContext = new KuduContext(KUDU_MASTER, spark.sparkContext)
 
     val log = Logger.getLogger(getClass.getName)
@@ -73,9 +80,13 @@ object BatchETL {
 
     log.info("***** Load Movies, Links and Genome_tags from Hive Data Lake *****")
 
-    val movies = spark.sql(s"select * from ${INPUT_MOVIES}")
-    val links = spark.sql(s"select * from ${INPUT_LINKS}")
-    val gtags = spark.sql(s"select * from ${INPUT_GTAGS}")
+//    val movies = spark.sql(s"select * from ${INPUT_MOVIES}")
+//    val links = spark.sql(s"select * from ${INPUT_LINKS}")
+//    val gtags = spark.sql(s"select * from ${INPUT_GTAGS}")
+
+    val movies = storage.readHiveTable(INPUT_MOVIES)
+    val links = storage.readHiveTable(INPUT_LINKS)
+    val gtags = storage.readHiveTable(INPUT_GTAGS)
 
     movies.show()
     links.show()
