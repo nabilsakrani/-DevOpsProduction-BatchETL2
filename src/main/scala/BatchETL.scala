@@ -12,10 +12,15 @@ object BatchETL {
   var INPUT_MOVIES = ""
   var INPUT_LINKS = ""
   var INPUT_GTAGS = ""
-  var KUDU_MASTER = "" //"cloudera-vm.c.endless-upgrade-187216.internal:7051"
+  var KUDU_ADDRESS = "" //"cloudera-vm.c.endless-upgrade-187216.internal:7051"
+  var KUDU_PORT = ""
 
+  var KUDU_MOVIES = ""
+  var KUDU_GTAGS = ""
   var OUTPUT_KUDU_MOVIES = ""
   var OUTPUT_KUDU_GTAGS = ""
+  var KUDU_TABLE_BASE = ""
+  var KUDU_DATABASE = ""
 
   var SPARK_APPNAME = ""
   var SPARK_MASTER = ""
@@ -42,29 +47,28 @@ object BatchETL {
     INPUT_LINKS = configuration.getString("betl.hive.input.links")
     INPUT_GTAGS = configuration.getString("betl.hive.input.gtags")
 
-    KUDU_MASTER = configuration.getString("betl.kudu.master")
-    OUTPUT_KUDU_MOVIES = configuration.getString("betl.kudu.output.movies")
-    OUTPUT_KUDU_GTAGS = configuration.getString("betl.kudu.output.gtags")
+    KUDU_ADDRESS = configuration.getString("betl.kudu.address")
+    KUDU_PORT = configuration.getString("betl.kudu.port")
+    KUDU_MOVIES = configuration.getString("betl.kudu.movies_table")
+    KUDU_GTAGS = configuration.getString("betl.kudu.gtags_table")
+    KUDU_TABLE_BASE = configuration.getString("betl.kudu.table_base")
+    KUDU_DATABASE = configuration.getString("betl.kudu.database")
 
     SPARK_APPNAME = configuration.getString("betl.spark.app_name")
     SPARK_MASTER = configuration.getString("betl.spark.master")
-
-    var split = KUDU_MASTER.split(":")
-    var KUDU_ADDR = split(0)
-    var KUDU_PORT = split(0)
 
     storage = Storage()
       .init(SPARK_MASTER, SPARK_MASTER, true)
 
     val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
-    var kuduContext = new KuduContext(KUDU_MASTER, spark.sparkContext)
+    var kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)
 
     val log = Logger.getLogger(getClass.getName)
 
 
-    log.info(s"Kudu Master = ${KUDU_MASTER}")
-    log.info(s"Kudu Gtag table = ${OUTPUT_KUDU_GTAGS}")
-    log.info(s"Kudu Movies table = ${OUTPUT_KUDU_MOVIES}")
+    log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
+    log.info(s"Kudu Gtag table = $OUTPUT_KUDU_GTAGS")
+    log.info(s"Kudu Movies table = $OUTPUT_KUDU_MOVIES")
 
 
     log.warn("***** KUDU TABLES MUST EXISTS!!!!! *****")
@@ -104,6 +108,9 @@ object BatchETL {
     outMovies.show()
 
     log.info("***** Store Genometags and enriched movies to Kudu Data Mart *****")
+
+    OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE::$KUDU_DATABASE.$KUDU_MOVIES"
+
 
     kuduContext.upsertRows(outGTag, OUTPUT_KUDU_GTAGS)
     kuduContext.upsertRows(outMovies, OUTPUT_KUDU_MOVIES)
