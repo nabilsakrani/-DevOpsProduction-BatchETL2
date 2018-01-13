@@ -16,11 +16,13 @@ pipeline {
     stage('Test scalatest') {
       steps {
         sh 'sbt clean test'
+        archiveArtifacts 'target/test-reports/*.xml'
       }
     }
     stage('Build') {
       steps {
         sh 'sbt clean compile package assembly'
+        archiveArtifacts artifacts: 'target/scala-*/*.jar', fingerprint: true
       }
     }
     stage('Deploy') {
@@ -28,12 +30,6 @@ pipeline {
         sh 'sudo cp target/*/*.jar /opt/deploy/batchETL'
         sh 'sudo cp conf/* /opt/deploy/batchETL/'
       }
-    }
-  }
-  post {
-    always {
-      archiveArtifacts artifacts: 'target/scala-*/*.jar', fingerprint: true
-      archiveArtifacts 'target/test-reports/*.xml'
     }
   }
 }
