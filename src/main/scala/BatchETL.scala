@@ -12,6 +12,8 @@ object BatchETL {
   var INPUT_MOVIES = ""
   var INPUT_LINKS = ""
   var INPUT_GTAGS = ""
+  var HIVE_DATABASE = ""
+
   var KUDU_ADDRESS = "" //"cloudera-vm.c.endless-upgrade-187216.internal:7051"
   var KUDU_PORT = ""
 
@@ -46,6 +48,7 @@ object BatchETL {
     INPUT_MOVIES = configuration.getString("betl.hive.input.movies")
     INPUT_LINKS = configuration.getString("betl.hive.input.links")
     INPUT_GTAGS = configuration.getString("betl.hive.input.gtags")
+    HIVE_DATABASE = configuration.getString("betl.hive.database")
 
     KUDU_ADDRESS = configuration.getString("betl.kudu.address")
     KUDU_PORT = configuration.getString("betl.kudu.port")
@@ -88,9 +91,9 @@ object BatchETL {
 //    val links = spark.sql(s"select * from ${INPUT_LINKS}")
 //    val gtags = spark.sql(s"select * from ${INPUT_GTAGS}")
 
-    val movies = storage.readHiveTable(INPUT_MOVIES)
-    val links = storage.readHiveTable(INPUT_LINKS)
-    val gtags = storage.readHiveTable(INPUT_GTAGS)
+    val movies = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_MOVIES")
+    val links = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_LINKS")
+    val gtags = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_GTAGS")
 
     movies.show()
     links.show()
@@ -116,6 +119,8 @@ object BatchETL {
     kuduContext.upsertRows(outMovies, OUTPUT_KUDU_MOVIES)
 
     log.info("***** Close Spark session *****")
+
+    println("BATCH ETL PROCESS DONE")
 
     spark.stop()
 
