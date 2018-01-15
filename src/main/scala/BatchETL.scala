@@ -61,9 +61,6 @@ object BatchETL {
     KUDU_TABLE_BASE = configuration.getString("betl.kudu.table_base")
     KUDU_DATABASE = configuration.getString("betl.kudu.database")
 
-    OUTPUT_KUDU_MOVIES = configuration.getString("betl.kudu.movies_table")
-    OUTPUT_KUDU_GTAGS = configuration.getString("betl.kudu.gtags_table")
-
     SPARK_APPNAME = configuration.getString("betl.spark.app_name")
     SPARK_MASTER = configuration.getString("betl.spark.master")
 
@@ -88,6 +85,10 @@ object BatchETL {
 
     log.info(s"SPARK_APPNAME -> $SPARK_APPNAME")
     log.info(s"SPARK_MASTER -> $SPARK_MASTER")
+
+    OUTPUT_KUDU_MOVIES = s"$KUDU_DATABASE.$KUDU_MOVIES"
+    OUTPUT_KUDU_GTAGS = s"$KUDU_DATABASE.$KUDU_GTAGS"
+
 
     log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
     log.info(s"Kudu Gtag table = $OUTPUT_KUDU_GTAGS")
