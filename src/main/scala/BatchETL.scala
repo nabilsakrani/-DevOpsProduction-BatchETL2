@@ -86,9 +86,8 @@ object BatchETL {
     log.info(s"SPARK_APPNAME -> $SPARK_APPNAME")
     log.info(s"SPARK_MASTER -> $SPARK_MASTER")
 
-    OUTPUT_KUDU_MOVIES = s"$KUDU_DATABASE.$KUDU_MOVIES"
-    OUTPUT_KUDU_GTAGS = s"$KUDU_DATABASE.$KUDU_GTAGS"
-
+    OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE::$KUDU_DATABASE.$KUDU_MOVIES"
+    OUTPUT_KUDU_GTAGS = s"$KUDU_TABLE_BASE::$KUDU_DATABASE.$KUDU_GTAGS"
 
     log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
     log.info(s"Kudu Gtag table = $OUTPUT_KUDU_GTAGS")
@@ -107,10 +106,6 @@ object BatchETL {
     }
 
     log.info("***** Load Movies, Links and Genome_tags from Hive Data Lake *****")
-
-//    val movies = spark.sql(s"select * from ${INPUT_MOVIES}")
-//    val links = spark.sql(s"select * from ${INPUT_LINKS}")
-//    val gtags = spark.sql(s"select * from ${INPUT_GTAGS}")
 
     val movies = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_MOVIES")
     val links = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_LINKS")
@@ -132,8 +127,6 @@ object BatchETL {
     outMovies.show()
 
     log.info("***** Store Genometags and enriched movies to Kudu Data Mart *****")
-
-    OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE::$KUDU_DATABASE.$KUDU_MOVIES"
 
 
     kuduContext.upsertRows(outGTag, OUTPUT_KUDU_GTAGS)
