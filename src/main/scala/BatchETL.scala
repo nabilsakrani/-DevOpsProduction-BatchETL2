@@ -35,15 +35,15 @@ object BatchETL {
 */
 
   var CONF_DIR = ""
-  var CONFIG_FILE = "BatchETL.conf"
+  var CONFIG_FILE = "application.conf"
   var storage = Storage()
 
   def main(args: Array[String]): Unit = {
 
-    //val configuration = ConfigFactory.load("BatchETL")
+    //CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+    //val configuration = ConfigFactory.parseFile(new File(s"${CONF_DIR}/${CONFIG_FILE}"))
 
-    CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
-    val configuration = ConfigFactory.parseFile(new File(s"${CONF_DIR}/${CONFIG_FILE}"))
+    val configuration = ConfigFactory.load()
 
     INPUT_MOVIES = configuration.getString("betl.hive.input.movies")
     INPUT_LINKS = configuration.getString("betl.hive.input.links")
@@ -61,7 +61,7 @@ object BatchETL {
     SPARK_MASTER = configuration.getString("betl.spark.master")
 
     storage = Storage()
-      .init(SPARK_MASTER, SPARK_MASTER, true)
+      .init(SPARK_MASTER, SPARK_MASTER, withHive = true)
 
     val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
     var kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)

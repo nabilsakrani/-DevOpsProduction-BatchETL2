@@ -1,23 +1,23 @@
 pipeline {
   agent any
   stages {
-    stage('Config System') {
+    stage('Setup Env') {
       steps {
         echo 'Setup the system'
         echo 'wget, curl, java, sbt and spark are now installed by Config Management system :)'
       }
     }
-    stage('Test the System') {
+    stage('Env setup test') {
       steps {
         sh 'java -version'
         sh 'sbt about'
       }
     }
-    stage('Test scalatest') {
+    stage('Unit Tests') {
       steps {
         sh 'sbt clean coverage test coverageReport'
         archiveArtifacts 'target/test-reports/*.xml'
-        archiveArtifacts 'target/scoverage-report/*'
+        archiveArtifacts 'target/scala-2.11/scoverage-report/*'
       }
     }
     stage('Build') {

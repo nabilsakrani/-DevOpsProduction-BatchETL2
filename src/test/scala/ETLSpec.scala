@@ -17,9 +17,8 @@ class ETLSpec
   "The ETL process" should
     "merge movies and links in orther to take only useful info" in {
 
-    //val configuration = ConfigFactory.load("BatchETL_staging")
-
-    CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+    //CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
+    CONF_DIR = "conf"
 
     println(s"\n\n${CONF_DIR}\n\n")
 
