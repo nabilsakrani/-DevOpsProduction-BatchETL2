@@ -40,10 +40,14 @@ object BatchETL {
 
   def main(args: Array[String]): Unit = {
 
+    val log = Logger.getLogger(getClass.getName)
+
     //CONF_DIR = scala.util.Properties.envOrElse("DEVOPS_CONF_DIR", "conf")
     //val configuration = ConfigFactory.parseFile(new File(s"${CONF_DIR}/${CONFIG_FILE}"))
 
     val configuration = ConfigFactory.load()
+
+    log.info(configuration.toString)
 
     INPUT_MOVIES = configuration.getString("betl.hive.input.movies")
     INPUT_LINKS = configuration.getString("betl.hive.input.links")
@@ -60,13 +64,28 @@ object BatchETL {
     SPARK_APPNAME = configuration.getString("betl.spark.app_name")
     SPARK_MASTER = configuration.getString("betl.spark.master")
 
+    log.info(s"INPUT_MOVIES -> ${INPUT_MOVIES}")
+    log.info(s"INPUT_LINKS -> ${INPUT_LINKS}")
+    log.info(s"INPUT_GTAGS -> ${INPUT_GTAGS}")
+    log.info(s"HIVE_DATABASE -> ${HIVE_DATABASE}")
+
+    log.info(s"KUDU_ADDRESS -> ${KUDU_ADDRESS}")
+    log.info(s"KUDU_PORT -> ${KUDU_PORT}")
+    log.info(s"KUDU_MOVIES -> ${KUDU_MOVIES}")
+    log.info(s"KUDU_GTAGS -> ${KUDU_GTAGS}")
+    log.info(s"KUDU_TABLE_BASE -> ${KUDU_TABLE_BASE}")
+    log.info(s"KUDU_DATABASE -> ${KUDU_DATABASE}")
+
+    log.info(s"SPARK_APPNAME -> ${SPARK_APPNAME}")
+    log.info(s"SPARK_MASTER -> ${SPARK_MASTER}")
+
     storage = Storage()
       .init(SPARK_MASTER, SPARK_MASTER, withHive = true)
 
     val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
     var kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)
 
-    val log = Logger.getLogger(getClass.getName)
+
 
 
     log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
