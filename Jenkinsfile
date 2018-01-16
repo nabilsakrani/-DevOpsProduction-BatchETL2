@@ -36,7 +36,7 @@ pipeline {
     stage('Integration Tests') {
       steps {
         dir(path: '/opt/staging/IntegrationStagingProject') {
-          sh 'git pull'
+          sh 'pwd'
           sh 'sbt clean test'
         }
         
