@@ -23,28 +23,29 @@ pipeline {
     stage('Build') {
       steps {
         sh 'sbt clean compile package assembly'
-        archiveArtifacts artifacts: 'target/scala-*/*.jar', fingerprint: true
+        archiveArtifacts(artifacts: 'target/scala-*/*.jar', fingerprint: true)
       }
     }
     stage('Staging Deploy') {
-        steps {
-            sh 'sudo cp target/*/*.jar /opt/deploy/batchETL'
-            sh 'sudo cp conf/* /opt/deploy/batchETL/'
-            sh 'sudo cp target/*/*.jar /opt/staging/IntegrationStagingProject/lib'
-        }
+      steps {
+        sh 'sudo cp target/*/*.jar /opt/deploy/batchETL'
+        sh 'sudo cp conf/* /opt/deploy/batchETL/'
+        sh 'sudo cp target/*/*.jar /opt/staging/IntegrationStagingProject/lib'
+      }
     }
     stage('Integration Tests') {
-        steps {
-            dir(path: '/opt/staging/IntegrationStagingProject') {
-                sh 'sudo git pull'
-                sh 'sbt clean test'
-            }
-         }
+      steps {
+        dir(path: '/opt/staging/IntegrationStagingProject') {
+          sh 'git pull'
+          sh 'sbt clean test'
+        }
+        
+      }
     }
     stage('Production Deploy') {
-        steps {
-            echo 'Safe to Deploy'
-        }
+      steps {
+        echo 'Safe to Deploy'
+      }
     }
   }
 }
