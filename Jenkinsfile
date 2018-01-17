@@ -35,12 +35,12 @@ pipeline {
     }
     stage('Integration Tests') {
       steps {
-          sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
+        sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
       }
     }
     stage('Production Deploy') {
       steps {
-        echo 'Safe to Deploy'
+        echo 'Safe to Deploy in Production, Great Job :D'
       }
     }
   }
