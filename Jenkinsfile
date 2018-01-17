@@ -35,10 +35,7 @@ pipeline {
     }
     stage('Integration Tests') {
         steps {
-            dir(path: '/opt/staging/IntegrationStagingProject') {
-                sh 'sudo git pull'
-                sh 'sbt clean test'
-            }
+            sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
          }
     }
     stage('Production Deploy') {
