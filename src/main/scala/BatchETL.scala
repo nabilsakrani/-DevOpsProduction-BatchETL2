@@ -58,7 +58,7 @@ object BatchETL {
     val GATEWAY_PORT = configuration.getString("betl.metrics.gateway.port")
 
     val LABEL_MOVIES_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_hive_number")}"
-    val LABEL_LINKS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labelslinks_hive_number")}"
+    val LABEL_LINKS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.links_hive_number")}"
     val LABEL_GTAGS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.genometags_hive_number")}"
 
     val LABEL_MOVIES_KUDU_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_kudu_number")}"
