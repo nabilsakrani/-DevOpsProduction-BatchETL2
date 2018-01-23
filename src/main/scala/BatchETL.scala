@@ -1,6 +1,8 @@
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
+import io.prometheus.client.{CollectorRegistry, Gauge}
+import io.prometheus.client.exporter.PushGateway
 import it.reply.data.pasquali.Storage
 import org.apache.kudu.spark.kudu._
 import org.apache.log4j.Logger
@@ -8,24 +10,6 @@ import org.apache.spark.sql.SparkSession
 
 
 object BatchETL {
-
-  var INPUT_MOVIES = ""
-  var INPUT_LINKS = ""
-  var INPUT_GTAGS = ""
-  var HIVE_DATABASE = ""
-
-  var KUDU_ADDRESS = "" //"cloudera-vm.c.endless-upgrade-187216.internal:7051"
-  var KUDU_PORT = ""
-
-  var KUDU_MOVIES = ""
-  var KUDU_GTAGS = ""
-  var OUTPUT_KUDU_MOVIES = ""
-  var OUTPUT_KUDU_GTAGS = ""
-  var KUDU_TABLE_BASE = ""
-  var KUDU_DATABASE = ""
-
-  var SPARK_APPNAME = ""
-  var SPARK_MASTER = ""
 
 /*
   //TODO in the next update
@@ -49,27 +33,70 @@ object BatchETL {
 
     log.info(configuration.toString)
 
-    INPUT_MOVIES = configuration.getString("betl.hive.input.movies")
-    INPUT_LINKS = configuration.getString("betl.hive.input.links")
-    INPUT_GTAGS = configuration.getString("betl.hive.input.gtags")
-    HIVE_DATABASE = configuration.getString("betl.hive.database")
+    val INPUT_MOVIES = configuration.getString("betl.hive.input.movies")
+    val INPUT_LINKS = configuration.getString("betl.hive.input.links")
+    val INPUT_GTAGS = configuration.getString("betl.hive.input.gtags")
+    val HIVE_DATABASE = configuration.getString("betl.hive.database")
 
-    KUDU_ADDRESS = configuration.getString("betl.kudu.address")
-    KUDU_PORT = configuration.getString("betl.kudu.port")
-    KUDU_MOVIES = configuration.getString("betl.kudu.movies_table")
-    KUDU_GTAGS = configuration.getString("betl.kudu.gtags_table")
-    KUDU_TABLE_BASE = configuration.getString("betl.kudu.table_base")
-    KUDU_DATABASE = configuration.getString("betl.kudu.database")
+    val KUDU_ADDRESS = configuration.getString("betl.kudu.address")
+    val KUDU_PORT = configuration.getString("betl.kudu.port")
+    val KUDU_MOVIES = configuration.getString("betl.kudu.movies_table")
+    val KUDU_GTAGS = configuration.getString("betl.kudu.gtags_table")
+    val KUDU_TABLE_BASE = configuration.getString("betl.kudu.table_base")
+    val KUDU_DATABASE = configuration.getString("betl.kudu.database")
 
-    SPARK_APPNAME = configuration.getString("betl.spark.app_name")
-    SPARK_MASTER = configuration.getString("betl.spark.master")
+    val SPARK_APPNAME = configuration.getString("betl.spark.app_name")
+    val SPARK_MASTER = configuration.getString("betl.spark.master")
+
+    //**************************************************************
+    // Metrics
+
+    val ENV = configuration.getString("betl.metrics.environment")
+    val JOB_NAME = configuration.getString("betl.metrics.job_name")
+
+    val GATEWAY_ADDR = configuration.getString("betl.metrics.gateway.address")
+    val GATEWAY_PORT = configuration.getString("betl.metrics.gateway.port")
+
+    val LABEL_MOVIES_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_hive_number")}"
+    val LABEL_LINKS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labelslinks_hive_number")}"
+    val LABEL_GTAGS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.genometags_hive_number")}"
+
+    val LABEL_MOVIES_KUDU_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_kudu_number")}"
+    val LABEL_GTAGS_KUDU_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.genometags_kudu_number")}"
+
+    val LABEL_PROCESS_DURATION = s"${ENV}_${configuration.getString("betl.metrics.labels.process_duration")}"
+
+    //***************************************************************
+
+    val pushGateway : PushGateway = new PushGateway(s"$GATEWAY_ADDR:$GATEWAY_PORT")
+    val registry = new CollectorRegistry
+
+    val gaugeMoviesHive : Gauge = Gauge.build().name(LABEL_MOVIES_HIVE_NUMBER)
+      .help("\"Number of movie in the datalake before the ETL process\"").register(registry)
+
+    val gaugeLinksHive : Gauge = Gauge.build().name(LABEL_LINKS_HIVE_NUMBER)
+      .help("Number of links in the datalake before the ETL process").register(registry)
+
+    val gaugeGtagsHive : Gauge = Gauge.build().name(LABEL_GTAGS_HIVE_NUMBER)
+      .help("Number of genometags in the datalake befores the ETL process").register(registry)
+
+    val gaugeMoviesKudu : Gauge = Gauge.build().name(LABEL_MOVIES_KUDU_NUMBER)
+      .help("Number of enriched movies in the datamart after the ETL process").register(registry)
+
+    val gaugeGTagsKudu : Gauge = Gauge.build().name(LABEL_GTAGS_KUDU_NUMBER)
+      .help("Number of gtags in the datamart after the ETL process").register(registry)
+
+    val gaugeDuration : Gauge = Gauge.build().name(LABEL_PROCESS_DURATION)
+      .help("Duration of Batch ETL process").register(registry)
+
+    //*************************************************************************
 
     storage = Storage()
       .init(SPARK_MASTER, SPARK_MASTER, withHive = true)
+      .initKudu(KUDU_ADDRESS, KUDU_PORT, KUDU_TABLE_BASE)
 
     val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
-    var kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)
-
+    val kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)
 
     log.info(s"INPUT_MOVIES -> $INPUT_MOVIES")
     log.info(s"INPUT_LINKS -> $INPUT_LINKS")
@@ -86,8 +113,8 @@ object BatchETL {
     log.info(s"SPARK_APPNAME -> $SPARK_APPNAME")
     log.info(s"SPARK_MASTER -> $SPARK_MASTER")
 
-    OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_MOVIES"
-    OUTPUT_KUDU_GTAGS = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_GTAGS"
+    val OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_MOVIES"
+    val OUTPUT_KUDU_GTAGS = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_GTAGS"
 
     log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
     log.info(s"Kudu Gtag table = $OUTPUT_KUDU_GTAGS")
@@ -107,13 +134,16 @@ object BatchETL {
 
     log.info("***** Load Movies, Links and Genome_tags from Hive Data Lake *****")
 
+    val timer : Gauge.Timer = gaugeDuration.startTimer()
+
     val movies = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_MOVIES")
     val links = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_LINKS")
     val gtags = storage.readHiveTable(s"$HIVE_DATABASE.$INPUT_GTAGS")
 
-    movies.show()
-    links.show()
-    gtags.show()
+    gaugeMoviesHive.set(movies.count())
+    gaugeLinksHive.set(movies.count())
+    gaugeGtagsHive.set(movies.count())
+
 
     log.info("***** Do nothing on tags *****")
 
@@ -128,9 +158,15 @@ object BatchETL {
 
     log.info("***** Store Genometags and enriched movies to Kudu Data Mart *****")
 
-
     kuduContext.upsertRows(outGTag, OUTPUT_KUDU_GTAGS)
     kuduContext.upsertRows(outMovies, OUTPUT_KUDU_MOVIES)
+
+    timer.setDuration()
+
+    gaugeMoviesKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_MOVIES").count())
+    gaugeGTagsKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_GTAGS").count())
+
+    pushGateway.push(registry, JOB_NAME)
 
     log.info("***** Close Spark session *****")
 

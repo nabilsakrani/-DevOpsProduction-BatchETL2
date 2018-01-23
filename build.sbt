@@ -22,6 +22,14 @@ libraryDependencies ++= Seq(
   "org.apache.kudu" % "kudu-spark2_2.11" % "1.5.0"
 )
 
+libraryDependencies ++= Seq(
+
+  "io.prometheus" % "simpleclient" % "0.1.0",
+  "io.prometheus" % "simpleclient_common" % "0.1.0",
+  "io.prometheus" % "simpleclient_hotspot" % "0.1.0",
+  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
+)
+
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
