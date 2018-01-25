@@ -32,7 +32,7 @@ class ETLSpec
 
     val ENV = configuration.getString("betl.metrics.environment")
     val JOB_NAME = configuration.getString("betl.metrics.job_name")
-    val LABEL_PROCESS_DURATION = s"${ENV}_${configuration.getString("betl.metrics.labels.process_duration")}"
+    val LABEL_PROCESS_DURATION = s"${configuration.getString("betl.metrics.labels.process_duration")}"
     val GATEWAY_ADDR = configuration.getString("betl.metrics.gateway.address")
     val GATEWAY_PORT = configuration.getString("betl.metrics.gateway.port")
 
@@ -66,7 +66,7 @@ class ETLSpec
     val em = ETL.enrichMovies(mdf, ldf)
 
     timer.setDuration()
-    new PushGateway((s"$GATEWAY_ADDR:$GATEWAY_PORT")).push(registry, JOB_NAME)
+    new PushGateway((s"$GATEWAY_ADDR:$GATEWAY_PORT")).push(registry, s"${ENV}_${JOB_NAME}")
 
     assert(em.rdd.map{case Row(movieid, title, genres, link) => link}.collect()(0) == "https://www.themoviedb.org/movie/tmdbID-7")
   }

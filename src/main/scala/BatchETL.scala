@@ -57,14 +57,14 @@ object BatchETL {
     val GATEWAY_ADDR = configuration.getString("betl.metrics.gateway.address")
     val GATEWAY_PORT = configuration.getString("betl.metrics.gateway.port")
 
-    val LABEL_MOVIES_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_hive_number")}"
-    val LABEL_LINKS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.links_hive_number")}"
-    val LABEL_GTAGS_HIVE_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.genometags_hive_number")}"
+    val LABEL_MOVIES_HIVE_NUMBER = s"${configuration.getString("betl.metrics.labels.movies_hive_number")}"
+    val LABEL_LINKS_HIVE_NUMBER = s"${configuration.getString("betl.metrics.labels.links_hive_number")}"
+    val LABEL_GTAGS_HIVE_NUMBER = s"${configuration.getString("betl.metrics.labels.genometags_hive_number")}"
 
-    val LABEL_MOVIES_KUDU_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.movies_kudu_number")}"
-    val LABEL_GTAGS_KUDU_NUMBER = s"${ENV}_${configuration.getString("betl.metrics.labels.genometags_kudu_number")}"
+    val LABEL_MOVIES_KUDU_NUMBER = s"${configuration.getString("betl.metrics.labels.movies_kudu_number")}"
+    val LABEL_GTAGS_KUDU_NUMBER = s"${configuration.getString("betl.metrics.labels.genometags_kudu_number")}"
 
-    val LABEL_PROCESS_DURATION = s"${ENV}_${configuration.getString("betl.metrics.labels.process_duration")}"
+    val LABEL_PROCESS_DURATION = s"${configuration.getString("betl.metrics.labels.process_duration")}"
 
     //***************************************************************
 
@@ -166,7 +166,7 @@ object BatchETL {
     gaugeMoviesKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_MOVIES").count())
     gaugeGTagsKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_GTAGS").count())
 
-    pushGateway.push(registry, JOB_NAME)
+    pushGateway.push(registry, JOB_NAME, ENV)
 
     log.info("***** Close Spark session *****")
 
