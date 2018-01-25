@@ -166,7 +166,7 @@ object BatchETL {
     gaugeMoviesKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_MOVIES").count())
     gaugeGTagsKudu.set(storage.readKuduTable(s"$KUDU_DATABASE.$KUDU_GTAGS").count())
 
-    pushGateway.push(registry, JOB_NAME, ENV)
+    pushGateway.push(registry, s"${ENV}_${JOB_NAME}")
 
     log.info("***** Close Spark session *****")
 
