@@ -44,5 +44,3 @@ assemblyMergeStrategy in assembly := {
 }
 
 test in assembly := {}
-
-testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports")
