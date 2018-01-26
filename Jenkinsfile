@@ -36,7 +36,6 @@ pipeline {
         stage('Integration Tests') {
           steps {
             sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
-            archiveArtifacts 'target/test-reports/*.xml'
           }
         }
         stage('Deploy ?') {
