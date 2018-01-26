@@ -46,7 +46,7 @@ pipeline {
         stage('Deploy ?') {
           steps {
               script {
-                  header = "Job <${env.JOB_URL}|${env.BRANCH_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
+                  header = "Job <${env.JOB_URL}|${env.JOB_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
                   header += " build <${env.BUILD_URL}|${env.BUILD_DISPLAY_NAME}> <${env.RUN_DISPLAY_URL}|(Blue)>:"
                   message = "${header}\n"
                   author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
@@ -84,7 +84,7 @@ pipeline {
         post {
             success {
                 script {
-                    header = "Job <${env.JOB_URL}|${env.BRANCH_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
+                    header = "Job <${env.JOB_URL}|${env.JOB_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
                     header += " build <${env.BUILD_URL}|${env.BUILD_DISPLAY_NAME}> <${env.RUN_DISPLAY_URL}|(Blue)>:"
                     message = "${header}\n :smiley: New Batch ETL release deployed in Production"
 
