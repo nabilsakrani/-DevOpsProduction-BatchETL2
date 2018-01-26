@@ -52,10 +52,10 @@ pipeline {
                   commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                   message += " Commit by <@${author}> (${author}): ``` ${commitMessage} ``` "
                   message += "---"
-                  message += "\nThe new Batch ETL commit pass Unit and Integration tests"
+                  message += "\nThe new **Batch ETL** commit pass Unit and Integration tests"
                   message += "\nThis session will be available for 60 second, make a CHOICE!"
                   message += "\nPlease <${env.RUN_DISPLAY_URL}|Manual Deploy> it if you want!"
-                  color = '#FFDD12'
+                  color = '#36ABCC'
                   slackSend(message: message, baseUrl: 'https://devops-pasquali-cm.slack.com/services/hooks/jenkins-ci/', color: color, token: 'ihoCVUPB7hqGz2xI1htD8x0F')
 
                   script{
@@ -71,10 +71,8 @@ pipeline {
                       }
                   }
               }
-
-              echo 'Soooooooooo lets deploy this shit'
           }
-      }
+        }
         stage('Production Deploy') {
           steps {
             echo 'Safe to Deploy in Production, Great Job :D'
@@ -121,7 +119,7 @@ pipeline {
                 script {
                     header = "Job <${env.JOB_URL}|${env.BRANCH_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
                     header += " build <${env.BUILD_URL}|${env.BUILD_DISPLAY_NAME}> <${env.RUN_DISPLAY_URL}|(Blue)>:"
-                    message = "${header}\nThe Build Failed, Release not ready for production!: ${failMessage}\n"
+                    message = "${header}\nThe Build Failed, Release not ready for production!: ``` ${failMessage} ```\n"
 
                     author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
                     commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
