@@ -1,3 +1,5 @@
+failMessage = ""
+
 pipeline {
       agent any
       stages {
@@ -64,6 +66,7 @@ pipeline {
                                       id: 'DeployBETL', message: 'Deploy in Production??')
                           }
                       } catch(err) { // timeout reached or input false
+                          failMessage = "Deploy session expired or aborted"
                           error("Deploy session expired or aborted")
                       }
                   }
@@ -118,7 +121,7 @@ pipeline {
                 script {
                     header = "Job <${env.JOB_URL}|${env.BRANCH_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
                     header += " build <${env.BUILD_URL}|${env.BUILD_DISPLAY_NAME}> <${env.RUN_DISPLAY_URL}|(Blue)>:"
-                    message = "${header}\nFAILED The Build Failed, Release not ready for production!:\n"
+                    message = "${header}\nThe Build Failed, Release not ready for production!: ${failMessage}\n"
 
                     author = sh(script: "git log -1 --pretty=%an", returnStdout: true).trim()
                     commitMessage = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
