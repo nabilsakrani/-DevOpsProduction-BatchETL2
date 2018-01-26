@@ -42,7 +42,7 @@ pipeline {
     stage('Production Deploy') {
       steps {
         echo 'Safe to Deploy in Production, Great Job :D'
-        sh 'ansible-playbook -i \'worker-test,\' --private-key=/home/xxpasquxx/.ssh/ansible_rsa_key /opt/DevOpsProduction-Orchestrator/ansible/deploy/batch_etl_deploy.yml  -e \'ansible_ssh_user=xxpasquxx\' -e \'host_key_checking=False\''
+        sh 'sudo ansible-playbook -i \'worker-test,\' --private-key=/home/xxpasquxx/.ssh/ansible_rsa_key /opt/DevOpsProduction-Orchestrator/ansible/deploy/batch_etl_deploy.yml  -e \'ansible_ssh_user=xxpasquxx\' -e \'host_key_checking=False\''
       }
     }
   }
