@@ -66,7 +66,12 @@ class ETLSpec
     val em = ETL.enrichMovies(mdf, ldf)
 
     timer.setDuration()
-    new PushGateway((s"$GATEWAY_ADDR:$GATEWAY_PORT")).push(registry, s"${ENV}_${JOB_NAME}")
+
+    try {
+      new PushGateway((s"$GATEWAY_ADDR:$GATEWAY_PORT")).push(registry, s"${ENV}_${JOB_NAME}")
+    }catch{
+      case _ : Exception => println("Unable to reach Metric Gateway")
+    }
 
     assert(em.rdd.map{case Row(movieid, title, genres, link) => link}.collect()(0) == "https://www.themoviedb.org/movie/tmdbID-7")
   }

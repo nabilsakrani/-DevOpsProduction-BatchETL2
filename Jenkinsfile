@@ -28,19 +28,21 @@ pipeline {
     }
     stage('Staging Deploy') {
       steps {
-        sh 'sudo cp target/*/*.jar /opt/deploy/batchETL'
+        sh 'sudo cp target/*/*assembly*.jar /opt/deploy/batch_etl'
         sh 'sudo cp conf/* /opt/deploy/batchETL/'
-        sh 'sudo cp target/*/*.jar /opt/staging/IntegrationStagingProject/lib'
+        sh 'sudo cp target/*/*assembly*.jar /opt/staging/IntegrationStagingProject/lib'
       }
     }
     stage('Integration Tests') {
       steps {
         sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
+        archiveArtifacts 'target/test-reports/*.xml'
       }
     }
     stage('Production Deploy') {
       steps {
         echo 'Safe to Deploy in Production, Great Job :D'
+        sh 'ansible-playbook -i \'worker-test,\' --private-key=/home/xxpasquxx/.ssh/ansible_rsa_key /opt/DevOpsProduction-Orchestrator/ansible/deploy/batch_etl_deploy.yml  -e \'ansible_ssh_user=xxpasquxx\' -e \'host_key_checking=False\''
       }
     }
   }
