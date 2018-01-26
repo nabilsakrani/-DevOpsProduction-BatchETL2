@@ -101,7 +101,7 @@ pipeline {
 
             failure {
                 script {
-                    header = "Job <${env.JOB_URL}|${env.BRANCH_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
+                    header = "Job <${env.JOB_URL}|${env.JOB_NAME}> <${env.JOB_DISPLAY_URL}|(Blue)>"
                     header += " build <${env.BUILD_URL}|${env.BUILD_DISPLAY_NAME}> <${env.RUN_DISPLAY_URL}|(Blue)>:"
                     message = "${header}\nThe Build Failed, Release not ready for production!: ``` ${failMessage} ```\n"
 
