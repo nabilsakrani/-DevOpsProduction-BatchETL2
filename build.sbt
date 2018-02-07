@@ -10,6 +10,7 @@ resolvers ++= Seq(
   "All Spark Repository -> bintray-spark-packages" at "https://dl.bintray.com/spark-packages/maven/"
 )
 
+
 libraryDependencies ++= Seq(
 
   "org.apache.spark" % "spark-core_2.11" % "2.2.0",
@@ -23,10 +24,7 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
 
   "com.typesafe" % "config" % "1.3.2",
-  "org.scalatest" % "scalatest_2.11" % "2.2.2" % "test",
-  //"org.scalatest" % "scalatest_2.11" % "3.0.4" % "test",
-  //"org.scalactic" %% "scalactic" % "3.0.4"
-
+  "org.scalatest" %% "scalatest" % "2.2.2" % "test"
 )
 
 libraryDependencies ++= Seq(
