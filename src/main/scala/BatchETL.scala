@@ -95,9 +95,6 @@ object BatchETL {
       .init(SPARK_MASTER, SPARK_MASTER, withHive = true)
       .initKudu(KUDU_ADDRESS, KUDU_PORT, KUDU_TABLE_BASE)
 
-    val spark = SparkSession.builder().master(SPARK_MASTER).appName(SPARK_APPNAME).getOrCreate()
-    val kuduContext = new KuduContext(s"$KUDU_ADDRESS:$KUDU_PORT", spark.sparkContext)
-
     log.info(s"INPUT_MOVIES -> $INPUT_MOVIES")
     log.info(s"INPUT_LINKS -> $INPUT_LINKS")
     log.info(s"INPUT_GTAGS -> $INPUT_GTAGS")
@@ -113,8 +110,8 @@ object BatchETL {
     log.info(s"SPARK_APPNAME -> $SPARK_APPNAME")
     log.info(s"SPARK_MASTER -> $SPARK_MASTER")
 
-    val OUTPUT_KUDU_MOVIES = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_MOVIES"
-    val OUTPUT_KUDU_GTAGS = s"$KUDU_TABLE_BASE$KUDU_DATABASE.$KUDU_GTAGS"
+    val OUTPUT_KUDU_MOVIES = s"$KUDU_DATABASE.$KUDU_MOVIES"
+    val OUTPUT_KUDU_GTAGS = s"$KUDU_DATABASE.$KUDU_GTAGS"
 
     log.info(s"Kudu Master = $KUDU_ADDRESS:$KUDU_PORT")
     log.info(s"Kudu Gtag table = $OUTPUT_KUDU_GTAGS")
@@ -123,12 +120,12 @@ object BatchETL {
 
     log.warn("***** KUDU TABLES MUST EXISTS!!!!! *****")
 
-    val genomeExists = kuduContext.tableExists(OUTPUT_KUDU_GTAGS)
-    val movieExists = kuduContext.tableExists(OUTPUT_KUDU_MOVIES)
+    val genomeExists = storage.kuduContext.tableExists(s"$KUDU_TABLE_BASE$OUTPUT_KUDU_GTAGS")
+    val movieExists = storage.kuduContext.tableExists(s"$KUDU_TABLE_BASE$OUTPUT_KUDU_MOVIES")
 
     if(!genomeExists || !movieExists){
       log.error("***** CREATE KUDU TABLES BEFORE RUN THIS SHIT *****")
-      spark.stop()
+      storage.closeSession()
       sys.exit(1)
     }
 
@@ -158,8 +155,8 @@ object BatchETL {
 
     log.info("***** Store Genometags and enriched movies to Kudu Data Mart *****")
 
-    kuduContext.upsertRows(outGTag, OUTPUT_KUDU_GTAGS)
-    kuduContext.upsertRows(outMovies, OUTPUT_KUDU_MOVIES)
+    storage.upsertKuduRows(outGTag, OUTPUT_KUDU_GTAGS)
+    storage.upsertKuduRows(outMovies, OUTPUT_KUDU_MOVIES)
 
     timer.setDuration()
 
@@ -172,7 +169,7 @@ object BatchETL {
 
     println("BATCH ETL PROCESS DONE")
 
-    spark.stop()
+    storage.closeSession()
 
   }
 
