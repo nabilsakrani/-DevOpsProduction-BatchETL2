@@ -120,8 +120,8 @@ object BatchETL {
 
     log.warn("***** KUDU TABLES MUST EXISTS!!!!! *****")
 
-    val genomeExists = storage.kuduContext.tableExists(OUTPUT_KUDU_GTAGS)
-    val movieExists = storage.kuduContext.tableExists(OUTPUT_KUDU_MOVIES)
+    val genomeExists = storage.kuduContext.tableExists(s"$KUDU_TABLE_BASE$OUTPUT_KUDU_GTAGS")
+    val movieExists = storage.kuduContext.tableExists(s"$KUDU_TABLE_BASE$OUTPUT_KUDU_MOVIES")
 
     if(!genomeExists || !movieExists){
       log.error("***** CREATE KUDU TABLES BEFORE RUN THIS SHIT *****")
