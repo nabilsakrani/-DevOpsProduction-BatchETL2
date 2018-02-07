@@ -3,7 +3,7 @@ failMessage = ""
 pipeline {
       agent any
       environment {
-          DEPLOY_TARGET = 'worker-test'
+          DEPLOY_TARGET = 'devops-worker'
       }
       stages {
         stage('Setup Env') {
