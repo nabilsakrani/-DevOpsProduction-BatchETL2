@@ -23,6 +23,7 @@ pipeline {
             sh 'sbt clean coverage test coverageReport'
             archiveArtifacts 'target/test-reports/*.xml'
             archiveArtifacts 'target/scala-2.11/scoverage-report/*'
+            junit(testResults: 'target/test-reports/ETLSpec.xml', allowEmptyResults: true)
           }
         }
         stage('Build') {
@@ -36,6 +37,7 @@ pipeline {
             sh 'sudo cp target/*/*assembly*.jar /opt/deploy/batch_etl'
             sh 'sudo cp conf/* /opt/deploy/batch_etl'
             sh 'sudo cp target/*/*assembly*.jar /opt/staging/IntegrationStagingProject/lib'
+            junit(testResults: '/opt/staging/IntegrationStagingProject/target/test-reports/DevOpsSystemSpec.xml', allowEmptyResults: true)
           }
         }
         stage('Integration Tests') {
