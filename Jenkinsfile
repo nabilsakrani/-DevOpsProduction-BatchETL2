@@ -37,12 +37,12 @@ pipeline {
             sh 'sudo cp target/*/*assembly*.jar /opt/deploy/batch_etl'
             sh 'sudo cp conf/* /opt/deploy/batch_etl'
             sh 'sudo cp target/*/*assembly*.jar /opt/staging/IntegrationStagingProject/lib'
-            junit(testResults: '/opt/staging/IntegrationStagingProject/target/test-reports/DevOpsSystemSpec.xml', allowEmptyResults: true)
           }
         }
         stage('Integration Tests') {
           steps {
             sh 'cd /opt/staging/IntegrationStagingProject/ && sbt clean test'
+            junit(testResults: '/opt/staging/IntegrationStagingProject/target/test-reports/DevOpsSystemSpec.xml', allowEmptyResults: true)
           }
         }
         stage('Deploy ?') {
