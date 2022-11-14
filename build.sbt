@@ -41,4 +41,4 @@ assemblyMergeStrategy in assembly := {
   case x => MergeStrategy.first
 }
 
-test in assembly := {}
+test in assembly := {} 
